@@ -83,11 +83,40 @@ export class ExtractionEngine {
   }
 
   private extractPayment = (text: string): { condition: string | null; freight: string | null; } => {
-    const conditionMatch = text.match(/Condição:\s*([^\r\n]+)/i);
-    const freightMatch = text.match(/Frete:\s*([^\r\n]+)/i);
+    // Use `*` to capture empty strings as well.
+    const conditionMatch = text.match(/Condição:\s*([^\r\n]*)/i);
+    const freightMatch = text.match(/Frete:\s*([^\r\n]*)/i);
+
+    let condition = conditionMatch ? conditionMatch[1].trim() : null;
+    let freight = freightMatch ? freightMatch[1].trim() : null;
+
+    // If a field's value contains the label of another known field, it's a strong sign of mis-extraction.
+    // This happens when the current field is empty and the parser concatenates lines.
+    if (condition && /frete:|observações:|faturamento\/cobrança/i.test(condition)) {
+      condition = null;
+    }
+    if (freight && /observações:|faturamento\/cobrança|assinatura digital/i.test(freight)) {
+      freight = null;
+    }
+
+    // Re-run general cleanup from previous requests on the potentially nulled values
+    if (condition && condition.toUpperCase().includes('CLICK')) {
+        condition = condition.split(/CLICK/i)[0].trim();
+    }
+    if (freight && freight.toUpperCase().includes('CNPJ')) {
+        freight = freight.split(/CNPJ/i)[0].trim();
+    }
+    if (freight && freight.endsWith('-')) {
+        freight = freight.slice(0, -1).trim();
+    }
+
+    // Final check for strings that become empty after cleaning
+    if (condition === '') condition = null;
+    if (freight === '') freight = null;
+    
     return {
-      condition: conditionMatch ? conditionMatch[1].trim() : null,
-      freight: freightMatch ? freightMatch[1].trim() : null,
+      condition,
+      freight,
     };
   }
   
@@ -147,7 +176,7 @@ export class ExtractionEngine {
     if (data.date) score++;
     if (data.supplier?.name) score++;
     if (data.items && data.items.length > 0) score++;
-    if (data.payment?.condition) score++;
+    if (data.payment?.condition || data.payment?.freight) score++;
     if (data.totals?.documentTotal && data.totals.documentTotal > 0) score++;
     
     // Return a value between 0 and 1, which will be displayed as a percentage

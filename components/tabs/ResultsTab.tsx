@@ -102,8 +102,8 @@ const ResultsTab: React.FC<ResultsTabProps> = ({ data }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoCard title="Pagamento" icon={<CreditCard size={16} />}>
-              <p><strong>Condição:</strong> {data.payment.condition || 'N/A'}</p>
-              <p><strong>Frete:</strong> {data.payment.freight || 'N/A'}</p>
+              <p><strong>Condição:</strong> {data.payment.condition || '-'}</p>
+              <p><strong>Frete:</strong> {data.payment.freight || '-'}</p>
           </InfoCard>
           <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
              <h3 className="text-sm font-semibold text-indigo-600 mb-2">Totais</h3>

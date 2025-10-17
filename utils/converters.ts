@@ -92,18 +92,32 @@ ${totalsXML}
 };
 
 export const formatForWhatsapp = (data: ExtractedData): string => {
-  let message = `*Resumo da Ordem de Compra: ${data.orderNumber || 'N/A'}*\n\n`;
-  
-  message += `*Fornecedor:* ${data.supplier.name || 'N/A'}\n`;
-  message += `*Data:* ${data.date || 'N/A'}\n`;
-  message += `*Valor Total:* ${data.totals.totalValueFormatted || 'R$ 0,00'}\n\n`;
-  
-  message += `*Itens (${data.items.length}):*\n`;
+  const numeroOC = data.orderNumber || 'N/A';
+  const nomeFornecedor = data.supplier.name || 'N/A';
+  const valorTotal = data.totals.totalValue.toFixed(2).replace('.', ',');
+  const condicaoPagamento = data.payment.condition || '-';
+  const freteCondicao = data.payment.freight || '-';
+  const dataEmissao = data.date || 'N/A';
+
+  let message = `---
+Confirmamos a emissão da Ordem de Compra nº *${numeroOC}* para a *${nomeFornecedor}* referente aos itens cotados.
+
+---\n`;
+
+  message += `Os detalhes do pedido são:\n\n`;
+
   data.items.forEach(item => {
-    message += `  - ${item.quantity} ${item.unit} | ${item.description} (Cód: ${item.code})\n`;
+    message += `*_[${item.code} - ${item.description} - Qtde: ${item.quantity} ${item.unit}]_*\n`;
   });
-  
-  message += `\n*Condição de Pagamento:* ${data.payment.condition || 'N/A'}\n`;
+
+  message += `\n`;
+  message += `*_Valor Total: R$ ${valorTotal}_*\n`;
+  message += `*_Condição de Pagamento: ${condicaoPagamento}_*\n`;
+  message += `*_Condição de Frete: ${freteCondicao}_*\n\n`;
+
+  message += `Segue em Anexo a Ordem de compras:\n\n`;
+  message += `📎 *OC - ${numeroOC} - ${nomeFornecedor} - ${dataEmissao}*\n\n`;
+  message += `---`;
 
   return message;
 };
