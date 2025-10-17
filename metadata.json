@@ -1,0 +1,5 @@
+{
+  "name": "EXTRATOR DE OC",
+  "description": "A powerful, browser-based system for extracting data from Purchase Orders. It processes PDF, JPG, and PNG files directly on your device using pdf.js and Tesseract.js (OCR) for maximum speed, privacy, and reliability. No external APIs are used.",
+  "requestFramePermissions": []
+}
